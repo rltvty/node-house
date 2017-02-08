@@ -16,6 +16,22 @@ for (var roomId in rooms) {
         if (control.roomId == roomId) {
             control.controlId = controlId;
             control.controlType = controlTypes[control.controlTypeId];
+            for(var controlProperty in control.controlType['properties']) {
+                var controlPropertyType = control.controlType['properties'][controlProperty]['type'];
+                switch (controlPropertyType) {
+                    case 'uint8':
+                    case 'uint':
+                        control.controlType['properties'][controlProperty]['value'] = 0;
+                        break;
+                    case 'boolean':
+                        control.controlType['properties'][controlProperty]['value'] = false;
+                        break;
+                    case 'selection':
+                        var choices = control.controlType['properties'][controlProperty]['choices'];
+                        control.controlType['properties'][controlProperty]['value'] = choices[0];
+                        break;
+                }
+            }
             delete control.roomId;
             room.controls.push(control);
         }
