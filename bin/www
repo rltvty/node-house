@@ -7,12 +7,14 @@
 var app = require('../app');
 var debug = require('debug')('node-house:server');
 var http = require('http');
+var eventServer = require('../event-server');
+var WebSocketClient = require('websocket').client;
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3001');
+var port = normalizePort(process.env.PORT || '3003');
 app.set('port', port);
 
 /**
@@ -20,6 +22,56 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+var eServer = eventServer(server);
+
+
+
+var audioClient = new WebSocketClient();
+
+audioClient.on('connectFailed', function(error) {
+    console.log('Audio Connect Error: ' + error.toString());
+});
+
+audioClient.on('connect', function(connection) {
+    console.log('Audio WebSocket Client Connected');
+    connection.on('error', function(error) {
+        console.log("Audio Connection Error: " + error.toString());
+    });
+    connection.on('close', function() {
+        console.log('audio echo-protocol Connection Closed');
+    });
+    connection.on('message', function(message) {
+        if (message.type === 'utf8') {
+            eServer.sendEvent(JSON.parse(message.utf8Data));
+        }
+    });
+});
+
+audioClient.connect('ws://localhost:3002/', 'event-stream');
+
+var lightsClient = new WebSocketClient();
+
+lightsClient.on('connectFailed', function(error) {
+    console.log('lights Connect Error: ' + error.toString());
+});
+
+lightsClient.on('connect', function(connection) {
+    console.log('lights WebSocket Client Connected');
+    connection.on('error', function(error) {
+        console.log("lights Connection Error: " + error.toString());
+    });
+    connection.on('close', function() {
+        console.log('lights echo-protocol Connection Closed');
+    });
+    connection.on('message', function(message) {
+        if (message.type === 'utf8') {
+            eServer.sendEvent(JSON.parse(message.utf8Data));
+        }
+    });
+});
+
+lightsClient.connect('ws://localhost:3001/', 'event-stream');
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -88,3 +140,5 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+
+
