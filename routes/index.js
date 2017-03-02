@@ -40,7 +40,7 @@ router.get('/lights/*', function (req, res) {
 router.post('/audio/*', function (req, res) {
     var path = 'http://localhost:3002/' + req.path.substring(7);
     console.log('posting to:  ' + path);
-    request.post({url: path, form: req.body, timeout: 2500}, function (err, response, body) {
+    request.post({url: path, form: req.body, timeout: 2500}, function (error, response, body) {
         if (error) {
             res.status(500).send(error)
         } else {
@@ -52,7 +52,7 @@ router.post('/audio/*', function (req, res) {
 router.post('/lights/*', function (req, res) {
     var path = 'http://localhost:3001/' + req.path.substring(8);
     console.log('posting to:  ' + path);
-    request.post({url: path, form: req.body, timeout: 2500}, function (err, response, body) {
+    request.post({url: path, form: req.body, timeout: 2500}, function (error, response, body) {
         if (error) {
             res.status(500).send(error)
         } else {
